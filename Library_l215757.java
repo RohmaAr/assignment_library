@@ -4,6 +4,10 @@
  */
 package scd_a1;
 
+import java.awt.Color;
+import java.awt.FlowLayout;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.text.ParseException;
@@ -12,16 +16,49 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.Set;
+import javax.swing.*;
 
 /**
  *
  * @author Dell
  */
-public class Library_l215757 {
+
+
+
+
+public class Library_l215757 implements MouseListener{
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+                 int selectedRow = table.rowAtPoint(e.getPoint());
+                if (selectedRow >= 0) {
+                    System.out.println("Clicked on row: " + selectedRow);
+                }
+      
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+      //  throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+        //throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+        //throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+        //throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+    JTable table;
    private ArrayList<Item> items;
    private HashMap<Integer,Borrower> borrowRecord;
    
@@ -29,8 +66,44 @@ public class Library_l215757 {
     {
         Library_l215757 lib=new Library_l215757(); 
         lib.loadFromFile();
-        lib.menu();
+        lib.Menu();
     }
+   public void Menu()
+   {
+       JFrame frame=new JFrame("Menu");
+        frame.setSize(500,600);
+        frame.setResizable(false);
+        frame.setLayout(new FlowLayout());
+        frame.setBackground(Color.GRAY);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        String[][] menuArray;
+        String[] colNames={"Title","Type"};
+        menuArray=new String[items.size()][2];
+        for(int i=0;i<items.size();i++){
+           
+           menuArray[i][0]=items.get(i).getTitle();
+           if(items.get(i).getClass()==Book.class)
+               menuArray[i][1]="Book";
+           else if(items.get(i).getClass()==Magazine.class)
+                menuArray[i][1]="Magazine";
+          else if(items.get(i).getClass()==Newspaper.class)
+           menuArray[i][1]="Newspaper";
+       }
+        for(int i=0;i<menuArray.length;i++)
+        {
+            for(int j=0;j<menuArray[i].length;j++)
+            {
+                System.out.print(menuArray[i][j]+" ");
+            }
+            System.out.println("");
+        }
+        table=new JTable(menuArray,colNames);
+        JScrollPane scroll=new JScrollPane(table);
+        table.addMouseListener(this);
+        frame.add(scroll);
+         frame.setVisible(true);
+       
+   }
     private Item getItemById(int id)
     {
         for(int i=0;i<items.size();i++)
