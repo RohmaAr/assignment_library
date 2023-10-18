@@ -5,20 +5,25 @@
 package scd_a1;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 
 /**
  *
@@ -27,41 +32,134 @@ import javax.swing.*;
 
 
 
-
-public class Library_l215757 implements MouseListener{
-
-    @Override
-    public void mouseClicked(MouseEvent e) {
-                 int selectedRow = table.rowAtPoint(e.getPoint());
-                if (selectedRow >= 0) {
-                    System.out.println("Clicked on row: " + selectedRow);
-                }
-      
-    }
-
-    @Override
-    public void mousePressed(MouseEvent e) {
-      //  throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent e) {
-        //throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent e) {
-        //throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e) {
-        //throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-    JTable table;
-   private ArrayList<Item> items;
-   private HashMap<Integer,Borrower> borrowRecord;
    
+public class Library_l215757{
+    private int selectedRow;
+   JTable table;
+   private ArrayList<Book> items;
+   private HashMap<Integer,Borrower> borrowRecord;
+
+     class ButtonRenderer extends DefaultTableCellRenderer {
+        private JButton button = new JButton("Read");
+
+        public ButtonRenderer() {
+            button.setOpaque(true);
+        }
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            if (isSelected) {
+                button.setForeground(table.getSelectionForeground());
+                button.setBackground(table.getSelectionBackground());
+            } else {
+                button.setForeground(table.getForeground());
+                button.setBackground(UIManager.getColor("Button.background"));
+            }
+            //button.setText(value == null ? "" : value.toString());
+            return button;
+        }
+    }
+    class ButtonEditor extends DefaultCellEditor {
+        private JButton button;
+        private JTable table;
+
+        public ButtonEditor(JTable table) {
+            super(new JCheckBox());
+            button = new JButton("Read");
+            button.setOpaque(true);
+            this.table = table;
+            // Add an ActionListener to open the text file using data from the first column
+            button.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    int selectedRow = table.getEditingRow();
+                    if (selectedRow >= 0) {
+                        String fileName = table.getValueAt(selectedRow, 0).toString();
+                        if(fileName!=null){
+                            System.out.println(fileName);
+                        readBook(fileName);
+                          }
+                    }
+                    
+                }
+            });
+        }
+
+        @Override
+        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+            return button;
+        }
+    }
+
+    
+    public void readBook(String book)
+    { 
+        try {
+            JTextArea litera=new JTextArea();
+            JScrollPane scroll=new JScrollPane(litera);
+            scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+            scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+            JFrame frame=new JFrame(book);
+            File Obj=new File(book+".txt");
+            Scanner scan=new Scanner(Obj);
+            String read;
+            while(scan.hasNextLine())
+            {
+                read=scan.nextLine();
+                litera.append(read+"\n");
+            }
+            litera.setWrapStyleWord(true);
+            litera.setLineWrap(true);
+            frame.setSize(600, 600);
+            frame.add(scroll);
+            frame.setVisible(true);
+            frame.addWindowListener(new WindowListener(){
+                @Override
+                public void windowOpened(WindowEvent e) {
+                    throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+                }
+
+                @Override
+                public void windowClosing(WindowEvent e) {
+                    Object message="Are you sure you want to exit?";
+                    int choice= JOptionPane.showConfirmDialog(frame, message, "Confirm exit", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+                     if(choice==JOptionPane.YES_OPTION)
+                     {
+                         frame.dispose();
+                     }
+                }
+
+                @Override
+                public void windowClosed(WindowEvent e) {
+                    throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+                }
+
+                @Override
+                public void windowIconified(WindowEvent e) {
+                    throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+                }
+
+                @Override
+                public void windowDeiconified(WindowEvent e) {
+                    throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+                }
+
+                @Override
+                public void windowActivated(WindowEvent e) {
+                    throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+                }
+
+                @Override
+                public void windowDeactivated(WindowEvent e) {
+                    throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+                }
+            });
+            frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(Library_l215757.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
    public static void main(String[] arr)
     {
         Library_l215757 lib=new Library_l215757(); 
@@ -77,18 +175,15 @@ public class Library_l215757 implements MouseListener{
         frame.setBackground(Color.GRAY);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         String[][] menuArray;
-        String[] colNames={"Title","Type"};
-        menuArray=new String[items.size()][2];
+        String[] colNames={"Title","Author","Year","Read"};
+        menuArray=new String[items.size()][4];
         for(int i=0;i<items.size();i++){
            
            menuArray[i][0]=items.get(i).getTitle();
-           if(items.get(i).getClass()==Book.class)
-               menuArray[i][1]="Book";
-           else if(items.get(i).getClass()==Magazine.class)
-                menuArray[i][1]="Magazine";
-          else if(items.get(i).getClass()==Newspaper.class)
-           menuArray[i][1]="Newspaper";
-       }
+           menuArray[i][1]=items.get(i).getPubOrAuthor();
+           menuArray[i][2]=String.valueOf(items.get(i).getYear());
+            System.out.println(String.valueOf(items.get(i).getYear()));
+        }
         for(int i=0;i<menuArray.length;i++)
         {
             for(int j=0;j<menuArray[i].length;j++)
@@ -98,13 +193,40 @@ public class Library_l215757 implements MouseListener{
             System.out.println("");
         }
         table=new JTable(menuArray,colNames);
+       
+        table.addMouseMotionListener(new MouseMotionListener(){
+           @Override
+           public void mouseDragged(MouseEvent e) {
+               throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+           }
+
+           @Override
+           public void mouseMoved(MouseEvent e) {
+            int row = table.rowAtPoint(e.getPoint());
+    if (row >= 0) {
+        table.getSelectionModel().setSelectionInterval(row, row); // Highlight the row
+    }    
+           }
+        
+        });
         JScrollPane scroll=new JScrollPane(table);
-        table.addMouseListener(this);
         frame.add(scroll);
-         frame.setVisible(true);
+        // Add an ActionListener to the buttons
+        table.getColumnModel().getColumn(3).setCellRenderer(new ButtonRenderer());
+
+        // Add an ActionListener to open the text file using data from the first column
+        table.getColumnModel().getColumn(3).setCellEditor(new ButtonEditor(table));
+        
+        JButton deleteButton=new JButton("Delete");
+        JButton editButton=new JButton("Edit");
+        JButton readButton=new JButton("Read");
+        frame.add(deleteButton);
+        frame.add(editButton);
+        frame.add(readButton);
+        frame.setVisible(true);
        
    }
-    private Item getItemById(int id)
+    private Book getItemById(int id)
     {
         for(int i=0;i<items.size();i++)
         {
@@ -139,7 +261,7 @@ public class Library_l215757 implements MouseListener{
             else
             {
                 borrowRecord.put(id, b);
-                Item it=getItemById(id);
+                Book it=getItemById(id);
                 System.out.println("You have borrowed:");
                 it.setBorrowed(true);
                 it.setPop(it.getPop()+1);
@@ -160,6 +282,7 @@ public class Library_l215757 implements MouseListener{
     }
     public void addItem()
     {
+        JFrame frame=new JFrame("Add Item");
         System.out.println("What category of item would you like to add?");
         System.out.println("1.Book");
         System.out.println("2.Magazine");
@@ -169,9 +292,7 @@ public class Library_l215757 implements MouseListener{
         Scanner dataScan=new Scanner(System.in);
         String sep=dataScan.nextLine();
         int n=Integer.valueOf(sep);
-        switch (n)
-        {
-            case 1: Book  item=new Book();
+            Book  item=new Book();
                 System.out.println("Enter title of book:");
                 sep=dataScan.nextLine();
                 item.setTitle(sep);
@@ -188,58 +309,6 @@ public class Library_l215757 implements MouseListener{
                  item.setId();
                  items.add(item);
                  System.out.println("Book has been added to library records");
-                break;
-            case 2:   Magazine m=new Magazine();
-                System.out.println("Enter title of Magazine:");
-                sep=dataScan.nextLine();
-                m.setTitle(sep);
-                System.out.println("Enter magazine's authors' names, press enter to stop:");
-                sep=dataScan.nextLine();
-                while(!sep.isEmpty())
-                {
-                    m.addAuthor(sep);
-                    sep=dataScan.nextLine();
-                }
-                System.out.println("Enter Magazine's Publisher's name: ");
-                sep=dataScan.nextLine();
-                m.setPub(sep);
-                m.setPop(1);
-                System.out.println("Enter the Magazine's sale price:");
-                sep=dataScan.nextLine().trim();
-                System.out.println(sep);
-                m.setCost(m.calculateCost(Integer.valueOf(sep)));
-                System.out.println("THe cost isss"+m.getCost());
-                m.setId();
-                items.add(m);
-                System.out.println( "Magazine has been added to library records");
-                break;
-            case 3: Newspaper news=new Newspaper();
-                System.out.println("Enter title of Newspaper:");
-                sep=dataScan.nextLine();
-                news.setTitle(sep);
-                System.out.println("Enter Newspaper's Publisher's name: ");
-                sep=dataScan.nextLine();
-                news.setPub(sep);
-                System.out.println("Enter publishing date in the format dd-MM-yyyy");
-                sep=dataScan.nextLine().trim();
-                try {
-                        news.setDate(new SimpleDateFormat("dd-MM-yyyy").parse(sep));
-}               catch (ParseException e) {
-                e.printStackTrace(); 
-                }
-                news.setPop(1);
-                System.out.println("Enter the Newspaper's sale price:");
-                sep=dataScan.nextLine().trim();
-                news.setCost(news.calculateCost(Integer.valueOf(sep)));
-                news.setId();  
-                items.add(news);
-                System.out.println( "Newspaper has been added to library records");
-                
-                break;
-            case 4: return;
-            default:
-                System.out.println("Invalid value entered.");
-        }
             
     }
     public boolean editItem(int id)
@@ -263,128 +332,7 @@ public class Library_l215757 implements MouseListener{
          String sep;
         System.out.println("The item you picked is :");
         items.get(i).displayInfo();
-        if(items.get(i).getClass()==Newspaper.class)
-        {
-            Newspaper news=(Newspaper)items.get(i);
-            System.out.println("What do you want to edit in "+news.getTitle() +"?");
-            System.out.println("1.Title");
-            System.out.println("2.Cost");
-            System.out.println("3.Date");
-            System.out.println("4.Publisher");
-            System.out.println("5.Popularity");
-            System.out.println("6.Exit");
-            sep=dataScan.nextLine();
-            n=Integer.valueOf(sep);
-            switch(n){
-                case 1:System.out.println("Enter new name:");
-                      sep=dataScan.nextLine();
-                    news.setTitle(sep);
-                    System.out.println("Name changed successfully.");
-                    break;
-                case 2 : System.out.println("Enter new sale cost:");
-                      sep=dataScan.nextLine().trim();
-                      news.setCost(Integer.valueOf(sep));
-                      System.out.println("Cost changed successfully");
-                      break;
-                case 3:
-                System.out.println("Enter new publishing date in the format dd-MM-yyyy");
-                sep=dataScan.nextLine().trim();
-                try {
-                        news.setDate(new SimpleDateFormat("dd-MM-yyyy").parse(sep));
-                        System.out.println("Date changed successfully");
-}               catch (ParseException e) {
-                e.printStackTrace(); 
-                }
-                    break;
-                case 4:
-                        System.out.println("Enter Newspaper's new publisher name: ");
-                        sep=dataScan.nextLine();
-                        news.setPub(sep);
-                        break;
-                case 5: System.out.println("Enter new popularity count:");
-                         sep=dataScan.nextLine().trim();
-                      news.setPop(Integer.valueOf(sep));
-                      System.out.println("Popularity changed successfully");
-                      break;  
-                case 6: return false;
-                default: System.out.println("Incorrect choice ");
-                return false;
-            }
-           
-        }
-        else if(items.get(i).getClass()==Magazine.class)
-        {
-            Magazine mag=(Magazine)items.get(i);
-            System.out.println("What do you want to edit in "+mag.getTitle()+"?");
-            System.out.println("1.Title");
-            System.out.println("2.Author names");
-            System.out.println("3.Publisher");
-            System.out.println("4.Cost");
-            System.out.println("5.Popularity");
-            System.out.println("6.Exit");
-            sep=dataScan.nextLine();
-            n=Integer.valueOf(sep);
-            switch(n){
-                case 1:System.out.println("Enter new title of Magazine:");
-                sep=dataScan.nextLine();
-                mag.setTitle(sep);
-                break;
-                case 2:System.out.println("Following are the authors: ");
-                    mag.displayAuthors();
-                    System.out.println("Would you like to add or remove a certain author? Pick 1 to add or 2 to remove, any other chracter to exit:");
-                    sep=dataScan.nextLine();
-                    if(sep.equals("1"))
-                    {
-                        System.out.println("Enter name of author you want to add:");
-                        sep=dataScan.nextLine();
-                        mag.addAuthor(sep);
-                        System.out.println("Author name added");
-                    }
-                    else if(sep.equals("2"))
-                    {
-                        System.out.println("Enter a number between 1-"+mag.noOfAuthors()+"to delete the corresponding author:");
-                        mag.displayAuthors();
-                        sep=dataScan.nextLine().trim();
-                        int picked=Integer.valueOf(sep);
-                        if(picked>mag.noOfAuthors() || picked<1)
-                        {
-                            System.out.println("Incorrect input");
-                            return false;
-                        }
-                        else
-                        {
-                           
-                            System.out.println( mag.removeAuthor(--picked)+" has been removed from list of suthors");
-                        }
-                    }
-                    else
-                    {
-                       return false;
-                    }
-                    break;
-                case 3:
-                System.out.println("Enter Magazine's new Publisher name: ");
-                sep=dataScan.nextLine();
-                mag.setPub(sep);
-                    System.out.println("Publisher name successfully changed");
-                    break;
-                case 4:System.out.println("Enter the Magazine's new sale price:");
-                sep=dataScan.nextLine().trim();
-                mag.setCost(mag.calculateCost(Integer.valueOf(sep)));
-                    System.out.println("Cost successfully changed.");
-                    break;
-                case 5: System.out.println("Enter Popularity count:");
-                    sep=dataScan.nextLine().trim();                     
-                    mag.setPop(Integer.valueOf(sep));
-                    System.out.println("Popularity changed");
-                    break;
-                case 6: return false;
-                default : System.out.println("Incorrect input");
-                return false;
-            }
-        }
-        else if(items.get(i).getClass()==Book.class)
-        {
+
             Book book=(Book)items.get(i);
             System.out.println("Book");
             System.out.println("What do you want to edit in "+book.getTitle()+"?");
@@ -426,7 +374,6 @@ public class Library_l215757 implements MouseListener{
                 default : System.out.println("Incorrect option");
                 return false;
             }
-        }
         
         return found;
     }
@@ -435,7 +382,7 @@ public class Library_l215757 implements MouseListener{
         System.out.println("PATRON NAMES \t\t BORROWED ITEM");
         for(Map.Entry m:borrowRecord.entrySet())
         {
-            Item it=getItemById((int)m.getKey());
+            Book it=getItemById((int)m.getKey());
             Borrower b=(Borrower)m.getValue();
             System.out.println(b.getName()+"\t\t"+it.getTitle());
         }
@@ -583,12 +530,11 @@ public class Library_l215757 implements MouseListener{
     }
     private void populateArray(String s)
     {
-        if(s.charAt(0)=='1')
-        {
+        //if(s.charAt(0)=='1')
+        //{
             Book b=new Book();
              Scanner dataScan=new Scanner(s);   
              dataScan.useDelimiter(",");
-             dataScan.next();
                  String sep=dataScan.next();
                 b.setTitle(sep);
                  sep=dataScan.next();
@@ -602,61 +548,61 @@ public class Library_l215757 implements MouseListener{
                  b.setId();
                  items.add(b);
                 // items.get(items.size()-1).displayInfo();
-       }
-        else if(s.charAt(0)=='2')
-        {
-            Magazine m=new Magazine();
-             Scanner dataScan=new Scanner(s);
-             dataScan.useDelimiter(",");
-               dataScan.next();
-                   String sep=dataScan.next();
-                m.setTitle(sep);
-                sep=dataScan.next();
-                while(!sep.endsWith("."))
-                {
-                    m.addAuthor(sep);
-                    sep=dataScan.next();
-                }
-                m.addAuthor(sep);
-                sep=dataScan.next();
-                m.setPub(sep);
-                sep=dataScan.next().trim();
-                m.setPop(Integer.valueOf(sep));
-                sep=dataScan.next().trim();
-                m.setCost(m.calculateCost(Integer.valueOf(sep)));
-                m.setId();
-                items.add(m);
-                // items.get(items.size()-1).displayInfo();
-        }
-        else if(s.charAt(0)=='3')
-        {
-            Newspaper n=new Newspaper();
-             Scanner dataScan=new Scanner(s);
-             dataScan.useDelimiter(",");
-             dataScan.next();
-                   String sep=dataScan.next();
-                n.setTitle(sep);
-                sep=dataScan.next();
-                n.setPub(sep);
-                sep=dataScan.next().trim();
-                
-                try {
-                        n.setDate(new SimpleDateFormat("dd-MM-yyyy").parse(sep));
-}               catch (ParseException e) {
-                e.printStackTrace(); 
-                }
-                sep=dataScan.next().trim();
-                n.setPop(Integer.valueOf(sep));
-                sep=dataScan.next().trim();
-                n.setCost(n.calculateCost(Integer.valueOf(sep)));
-                n.setId();
-                  items.add(n);
-                // items.get(items.size()-1).displayInfo();
-           
-        }
-        else
-            System.out.println("Incorrect format.");
-            
+//       }
+//        else if(s.charAt(0)=='2')
+//        {
+//            Magazine m=new Magazine();
+//             Scanner dataScan=new Scanner(s);
+//             dataScan.useDelimiter(",");
+//               dataScan.next();
+//                   String sep=dataScan.next();
+//                m.setTitle(sep);
+//                sep=dataScan.next();
+//                while(!sep.endsWith("."))
+//                {
+//                    m.addAuthor(sep);
+//                    sep=dataScan.next();
+//                }
+//                m.addAuthor(sep);
+//                sep=dataScan.next();
+//                m.setPub(sep);
+//                sep=dataScan.next().trim();
+//                m.setPop(Integer.valueOf(sep));
+//                sep=dataScan.next().trim();
+//                m.setCost(m.calculateCost(Integer.valueOf(sep)));
+//                m.setId();
+//                items.add(m);
+//                // items.get(items.size()-1).displayInfo();
+//        }
+//        else if(s.charAt(0)=='3')
+//        {
+//            Newspaper n=new Newspaper();
+//             Scanner dataScan=new Scanner(s);
+//             dataScan.useDelimiter(",");
+//             dataScan.next();
+//                   String sep=dataScan.next();
+//                n.setTitle(sep);
+//                sep=dataScan.next();
+//                n.setPub(sep);
+//                sep=dataScan.next().trim();
+//                
+//                try {
+//                        n.setDate(new SimpleDateFormat("dd-MM-yyyy").parse(sep));
+//}               catch (ParseException e) {
+//                e.printStackTrace(); 
+//                }
+//                sep=dataScan.next().trim();
+//                n.setPop(Integer.valueOf(sep));
+//                sep=dataScan.next().trim();
+//                n.setCost(n.calculateCost(Integer.valueOf(sep)));
+//                n.setId();
+//                  items.add(n);
+//                // items.get(items.size()-1).displayInfo();
+//           
+//        }
+//        else
+//            System.out.println("Incorrect format.");
+//            
     }
     public void loadFromFile(){
          try {
@@ -684,16 +630,14 @@ public class Library_l215757 implements MouseListener{
 }
 interface Configuration{
   void displayInfo();
+  public String getPubOrAuthor();
   public int calculateCost(int c);
 }
 class Item implements Configuration{
-    protected String title;
-    protected boolean isBorrowed=false;
-    protected int popCount;
-    private static int incre=1;
-    protected int id;
-    protected int cost;
     public Item(){}
+    public String getPubOrAuthor(){
+    return "";
+    }
     @Override
     public void displayInfo() {
     }
@@ -701,6 +645,52 @@ class Item implements Configuration{
     @Override
     public int calculateCost(int c) {
          return 0;
+    }
+    
+}
+class Book{
+    protected String title;
+    protected boolean isBorrowed=false;
+    protected int popCount;
+    private static int incre=1;
+    protected int id;
+    protected int cost;
+    
+    private String author;
+    private int year;
+    public void setAuthor(String s)
+    {
+        author=s;
+    }
+    public void setYear(int year)
+    {
+        this.year=year;
+    }
+    public String getPubOrAuthor()
+    {
+        return author;
+    }
+    public int getYear()
+    {
+        return year;
+    }
+    public void displayInfo() {
+        System.out.println("");
+        System.out.println("BOOK Id: "+id);
+        System.out.println("Title: "+title);
+        System.out.println("Author: "+author);
+        System.out.println("Year: "+year);
+        if(isBorrowed==true)
+        System.out.println("Status: unavailable");
+        else
+            System.out.println("Status: available");
+        System.out.println("Cost: "+cost+" Rs.");
+        System.out.println("Popularity count: "+popCount);
+        System.out.println("");
+    }
+
+    public int calculateCost(int c) {
+         return (c*20/100)+c+200;
     }
     public void setTitle(String s)
     {
@@ -743,142 +733,103 @@ class Item implements Configuration{
         cost=c;
     }
 }
-class Book extends Item {
-    private String author;
-    private int year;
-    public void setAuthor(String s)
-    {
-        author=s;
-    }
-    public void setYear(int year)
-    {
-        this.year=year;
-    }
-    public String getAuthor()
-    {
-        return author;
-    }
-    public int getYear()
-    {
-        return year;
-    }
-    @Override
-    public void displayInfo() {
-        System.out.println("");
-        System.out.println("BOOK Id: "+id);
-        System.out.println("Title: "+title);
-        System.out.println("Author: "+author);
-        System.out.println("Year: "+year);
-        if(isBorrowed==true)
-        System.out.println("Status: unavailable");
-        else
-            System.out.println("Status: available");
-        System.out.println("Cost: "+cost+" Rs.");
-        System.out.println("Popularity count: "+popCount);
-        System.out.println("");
-    }
-
-    @Override
-    public int calculateCost(int c) {
-         return (c*20/100)+c+200;
-    }
-}
-class Magazine extends Item{
-    private String publisher;
-    private ArrayList<String> authors;
-    public void setPub(String s)
-    {
-        publisher=s;
-    }
-    public void displayAuthors()
-    {
-        for(int i=0;i<authors.size();i++){
-        System.out.println(i+1+" "+authors.get(i));
-        }
-    }
-    public String getPub()
-    {
-        return publisher;
-    }
-    public int noOfAuthors()
-    {
-        return authors.size();
-    }
-    public void addAuthor(String s)
-    {
-        if(authors==null)
-        {
-            authors= new ArrayList<>();
-        }
-        authors.add(s);
-    }
-    public String removeAuthor(int i)
-    {
-        return authors.remove(i);
-    }
-    @Override
-    public void displayInfo() {
-        
-        System.out.println("");
-        System.out.println("MAGAZINE Id: "+id);
-        System.out.println("Title: "+title);
-        System.out.println("Author: "+authors);
-        System.out.println("Publisher: "+publisher);
-        if(isBorrowed==true)
-        System.out.println("Status: unavailable");
-        else
-            System.out.println("Status: available");
-        System.out.println("Cost: "+cost+" Rs.");
-        System.out.println("Popularity count: "+popCount);
-        System.out.println("");
-    }
-
-    @Override
-    public final int calculateCost(int c) {
-        return (c*popCount);
-    }
-}
-class Newspaper extends Item{
-    private String publisher;
-    private Date date;
-    public void setPub(String s)
-    {
-        publisher=s;
-    }
-    public void setDate(Date d)
-    {
-        date=d;
-    }
-    public String getPub()
-    {
-        return publisher;
-    }
-    public Date getDate()
-    {
-        return date;
-    }
-    @Override
-    public void displayInfo() {
-    
-        System.out.println("");
-        System.out.println("NEWSPAPER Id: "+id);
-        System.out.println("Title: "+title);
-        System.out.println("Publisher: "+publisher);
-        System.out.println("Publishing Date: "+date);
-        if(isBorrowed==true)
-        System.out.println("Status: unavailable");
-        else
-            System.out.println("Status: available");
-        System.out.println("Cost: "+cost+" Rs.");
-        System.out.println("Popularity count: "+popCount);
-        System.out.println("");
-    }
-
-    @Override
-    public int calculateCost(int c) {
-        return (10+(5*c));
-    }
-}
+//class Magazine extends Item{
+//    private String publisher;
+//    private ArrayList<String> authors;
+//    public void setPub(String s)
+//    {
+//        publisher=s;
+//    }
+//    public void displayAuthors()
+//    {
+//        for(int i=0;i<authors.size();i++){
+//        System.out.println(i+1+" "+authors.get(i));
+//        }
+//    }
+//    @Override
+//    public String getPubOrAuthor()
+//    {
+//        return publisher;
+//    }
+//    public int noOfAuthors()
+//    {
+//        return authors.size();
+//    }
+//    public void addAuthor(String s)
+//    {
+//        if(authors==null)
+//        {
+//            authors= new ArrayList<>();
+//        }
+//        authors.add(s);
+//    }
+//    public String removeAuthor(int i)
+//    {
+//        return authors.remove(i);
+//    }
+//    @Override
+//    public void displayInfo() {
+//        
+//        System.out.println("");
+//        System.out.println("MAGAZINE Id: "+id);
+//        System.out.println("Title: "+title);
+//        System.out.println("Author: "+authors);
+//        System.out.println("Publisher: "+publisher);
+//        if(isBorrowed==true)
+//        System.out.println("Status: unavailable");
+//        else
+//            System.out.println("Status: available");
+//        System.out.println("Cost: "+cost+" Rs.");
+//        System.out.println("Popularity count: "+popCount);
+//        System.out.println("");
+//    }
+//
+//    @Override
+//    public final int calculateCost(int c) {
+//        return (c*popCount);
+//    }
+//}
+//class Newspaper extends Item{
+//    private String publisher;
+//    private Date date;
+//    public void setPub(String s)
+//    {
+//        publisher=s;
+//    }
+//    public void setDate(Date d)
+//    {
+//        date=d;
+//    }
+//    public String getPubOrAuthor()
+//    {
+//        return publisher;
+//    }
+//    public Date getDate()
+//    {
+//        return date;
+//    }
+//    @Override
+//    public void displayInfo() {
+//    
+//        System.out.println("");
+//        System.out.println("NEWSPAPER Id: "+id);
+//        System.out.println("Title: "+title);
+//        System.out.println("Publisher: "+publisher);
+//        System.out.println("Publishing Date: "+date);
+//        if(isBorrowed==true)
+//        System.out.println("Status: unavailable");
+//        else
+//            System.out.println("Status: available");
+//        System.out.println("Cost: "+cost+" Rs.");
+//        System.out.println("Popularity count: "+popCount);
+//        System.out.println("");
+//    }
+//
+//    @Override
+//    public int calculateCost(int c) {
+//        return (10+(5*c));
+//    }
+//}
 class Borrower{
     private String name;
     public void setName(String n)
