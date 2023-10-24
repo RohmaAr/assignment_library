@@ -4,21 +4,26 @@
  */
 package scd_a1;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.FlowLayout;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
+import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -34,7 +39,6 @@ import javax.swing.table.DefaultTableCellRenderer;
 
    
 public class Library_l215757{
-    private int selectedRow;
    JTable table;
    private ArrayList<Book> items;
    private HashMap<Integer,Borrower> borrowRecord;
@@ -55,7 +59,6 @@ public class Library_l215757{
                 button.setForeground(table.getForeground());
                 button.setBackground(UIManager.getColor("Button.background"));
             }
-            //button.setText(value == null ? "" : value.toString());
             return button;
         }
     }
@@ -70,19 +73,21 @@ public class Library_l215757{
             this.table = table;
             // Add an ActionListener to open the text file using data from the first column
             button.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    int selectedRow = table.getEditingRow();
-                    if (selectedRow >= 0) {
-                        String fileName = table.getValueAt(selectedRow, 0).toString();
-                        if(fileName!=null){
-                            System.out.println(fileName);
-                        readBook(fileName);
-                          }
-                    }
-                    
+    @Override
+    public void actionPerformed(ActionEvent e) {
+            int selectedRow = table.getEditingRow();
+            if (selectedRow >= 0) {
+                System.out.println("selected row in readL: " + selectedRow);
+                String fileName = table.getValueAt(selectedRow, 0).toString();
+                if (fileName != null) {
+                    System.out.println(fileName);
+                    readBook(fileName);
                 }
-            });
+            }
+        
+    }
+});
+
         }
 
         @Override
@@ -100,7 +105,8 @@ public class Library_l215757{
             scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
             scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
             JFrame frame=new JFrame(book);
-            File Obj=new File(book+".txt");
+            //File Obj=new File(book+".txt");
+            File Obj=new File("alice in the wonderland.txt");
             Scanner scan=new Scanner(Obj);
             String read;
             while(scan.hasNextLine())
@@ -110,15 +116,11 @@ public class Library_l215757{
             }
             litera.setWrapStyleWord(true);
             litera.setLineWrap(true);
+            litera.setEditable(false);
             frame.setSize(600, 600);
             frame.add(scroll);
             frame.setVisible(true);
-            frame.addWindowListener(new WindowListener(){
-                @Override
-                public void windowOpened(WindowEvent e) {
-                    throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-                }
-
+            frame.addWindowListener(new WindowAdapter(){
                 @Override
                 public void windowClosing(WindowEvent e) {
                     Object message="Are you sure you want to exit?";
@@ -127,31 +129,6 @@ public class Library_l215757{
                      {
                          frame.dispose();
                      }
-                }
-
-                @Override
-                public void windowClosed(WindowEvent e) {
-                    throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-                }
-
-                @Override
-                public void windowIconified(WindowEvent e) {
-                    throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-                }
-
-                @Override
-                public void windowDeiconified(WindowEvent e) {
-                    throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-                }
-
-                @Override
-                public void windowActivated(WindowEvent e) {
-                    throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-                }
-
-                @Override
-                public void windowDeactivated(WindowEvent e) {
-                    throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
                 }
             });
             frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -192,12 +169,18 @@ public class Library_l215757{
             }
             System.out.println("");
         }
+      
+        String[][] originalData = new String[items.size()][4];
+for (int i = 0; i < items.size(); i++) {
+    originalData[i][0] = items.get(i).getTitle();
+    originalData[i][1] = items.get(i).getPubOrAuthor();
+    originalData[i][2] = String.valueOf(items.get(i).getYear());
+}
         table=new JTable(menuArray,colNames);
-       
-        table.addMouseMotionListener(new MouseMotionListener(){
+           table.addMouseMotionListener(new MouseMotionListener(){
            @Override
            public void mouseDragged(MouseEvent e) {
-               throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+             //  throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
            }
 
            @Override
@@ -207,24 +190,121 @@ public class Library_l215757{
         table.getSelectionModel().setSelectionInterval(row, row); // Highlight the row
     }    
            }
-        
         });
+        table.setDefaultEditor(Object.class, null);
+
+// Make the table uneditable but allow row selection
+table.setRowSelectionAllowed(true);
+table.setColumnSelectionAllowed(false);
+
+// Prevent focus on the table
+table.setFocusable(false);
         JScrollPane scroll=new JScrollPane(table);
         frame.add(scroll);
-        // Add an ActionListener to the buttons
         table.getColumnModel().getColumn(3).setCellRenderer(new ButtonRenderer());
 
-        // Add an ActionListener to open the text file using data from the first column
         table.getColumnModel().getColumn(3).setCellEditor(new ButtonEditor(table));
-        
         JButton deleteButton=new JButton("Delete");
         JButton editButton=new JButton("Edit");
-        JButton readButton=new JButton("Read");
+        JButton addButton=new JButton("Add");
         frame.add(deleteButton);
         frame.add(editButton);
-        frame.add(readButton);
+        frame.add(addButton);
+        addButton.addActionListener(e->{
+        addBook(frame);
+        });
+        editButton.addActionListener(e -> {
+    // Toggle the edit mode
+    boolean editMode = table.isFocusable();
+    table.setFocusable(!editMode);
+});
+
         frame.setVisible(true);
        
+   }
+   public void addBook(JFrame f)
+   {
+       JDialog dialog =new JDialog(f);
+       dialog.setTitle("Add Book");
+       dialog.setLocation(30, 30);
+       dialog.setSize(500,300);
+       dialog.setLayout(new GridLayout(4,1));
+       JPanel p1=new JPanel();
+       p1.setLayout(new FlowLayout(FlowLayout.LEFT) );
+       JPanel p2=new JPanel();
+       p2.setLayout(new  FlowLayout(FlowLayout.LEFT));
+       JPanel p3=new JPanel();
+       p3.setLayout(new  FlowLayout(FlowLayout.LEFT) );
+       JPanel p4=new JPanel();
+       p4.setLayout(new BorderLayout());
+//       p1.setBorder(new LineBorder(Color.BLACK,3,true));
+//       p2.setBorder(new LineBorder(Color.BLUE,3,true));
+//       p3.setBorder(new LineBorder(Color.GREEN,3,true));
+       JLabel tlabel=new JLabel("Title:");
+       JLabel alabel=new JLabel("Author:");
+       JLabel ylabel=new JLabel("Publication Year:");
+       JTextField titleField=new JTextField(30);
+       JTextField authorField=new JTextField(30);
+       JTextField yearField=new JTextField(30);
+       JButton addButton=new JButton("Add");
+       addButton.addActionListener(e->{
+       String t=titleField.getText();
+       String a=authorField.getText();
+       String y=yearField.getText();
+       if(t.isEmpty() || a.isEmpty() || y.isEmpty())
+       {
+           JOptionPane.showMessageDialog(authorField, "BALNK BITH");
+       }
+       else
+       {
+           try{
+        int year=Integer.parseInt(y);
+        YearMonth currentYearMonth = YearMonth.now();
+        int curryear = currentYearMonth.getYear();
+        if(year>curryear)
+        {
+            throw new NumberFormatException();
+        }
+        else
+        {
+            Book newBook=new Book();
+            newBook.setAuthor(a);
+            newBook.setYear(year);
+            newBook.setTitle(t);
+            newBook.setPop(1);
+            items.add(newBook);
+            String savetoFile=t+","+a+","+y+",1";
+            File Obj = new File("C:\\Users\\Dell\\Documents\\NetBeansProjects\\scd_a1\\src\\scd_a1\\data.txt");
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(Obj, true))) {
+            // The second argument "true" in FileWriter constructor is for appending
+            writer.write(savetoFile); // Add a newline character if needed
+            System.out.println("Line appended to the file."+savetoFile);
+        } catch (IOException io) {
+            System.err.println("Error appending to the file: " + io.getMessage());
+        }
+        }
+        
+        }
+        catch(NumberFormatException ex)
+        {
+               JOptionPane.showMessageDialog(yearField, "Invalid input for year.");
+        }
+       }
+       });
+       p1.add(tlabel);
+       p1.add(titleField );
+       p2.add(alabel);
+       p2.add(authorField);
+       p3.add(ylabel);
+       p3.add(yearField);
+       p4.add(addButton);
+       dialog.add(p1);
+       dialog.add(p2);
+       dialog.add(p3);
+       dialog.add(p4);
+       dialog.setResizable(false);
+        dialog.pack();
+       dialog.setVisible(true);
    }
     private Book getItemById(int id)
     {
@@ -237,44 +317,6 @@ public class Library_l215757{
         }
         return null;
         
-    }
-    public boolean borrow(int id,Borrower b)
-    {
-        if(!borrowRecord.containsKey(id))
-        {
-            System.out.println("ERROR BEFORE");
-            boolean found=false;
-            for(int i=0;i<items.size();i++)
-            {
-              if(items.get(i).getId()==id)
-              {
-                found=true;
-                break;
-              }
-                System.out.println("ERROR IN LOO[");
-            } 
-            if(!found)
-            {
-            System.out.println("Item not found");
-            return found;
-            }
-            else
-            {
-                borrowRecord.put(id, b);
-                Book it=getItemById(id);
-                System.out.println("You have borrowed:");
-                it.setBorrowed(true);
-                it.setPop(it.getPop()+1);
-                it.displayInfo();
-                return true;
-            }
-        
-        }
-        else
-        {
-            System.out.println("This item is already borrowed by another patron");
-            return false;
-        }
     }
     public void displayByObject(Item i)
     {
@@ -377,16 +419,6 @@ public class Library_l215757{
         
         return found;
     }
-    public void viewBorrowedList()
-    {
-        System.out.println("PATRON NAMES \t\t BORROWED ITEM");
-        for(Map.Entry m:borrowRecord.entrySet())
-        {
-            Book it=getItemById((int)m.getKey());
-            Borrower b=(Borrower)m.getValue();
-            System.out.println(b.getName()+"\t\t"+it.getTitle());
-        }
-    }
     public boolean deleteItem(int id)
     {
         int i;
@@ -438,14 +470,6 @@ public class Library_l215757{
             {
                 case 1: hotPicks();
                     break;
-                case 2: System.out.println("Enter Id of the item you want to borrow: "); 
-                        sep=obj.nextLine();
-                        id=Integer.valueOf(sep);
-                        if(borrow(id,b))
-                            System.out.println(getItemById(id).getTitle()+" is now available to you.");
-                        else
-                            System.out.println("Could not borrow item");
-                    break;
                 case 3:  addItem();
                     break;
                 case 4:System.out.println("Enter id of item you want to edit:"); 
@@ -480,8 +504,6 @@ public class Library_l215757{
                         sep=obj.nextLine();
                         id=Integer.valueOf(sep);
                         this.displaySingleItem(id);
-                    break;
-                case 8: this.viewBorrowedList();
                     break;
                 case 9: return;
                 default :
@@ -543,9 +565,8 @@ public class Library_l215757{
                 b.setYear(Integer.valueOf(sep));
                  sep=dataScan.next().trim();
                 b.setPop(Integer.valueOf(sep));
-                sep=dataScan.next().trim();
-                 b.setCost(b.calculateCost(Integer.valueOf(sep)));
                  b.setId();
+                 b.displayInfo();
                  items.add(b);
                 // items.get(items.size()-1).displayInfo();
 //       }

@@ -1,10 +1,6 @@
-1, harry potter and the goblet of fire, jk rowling, 1997, 7, 455
-2, Forbes, micheal jordon, kim jung un, joe biden, important person., Forbes Publisher, 5, 600
-3, Jung, GeoTv, 23-11-2022, 1, 657
-1, the alchemist, paulo coelho, 2015, 3, 233
-3, The Guardian, Guardian publisher, 18-3-2000, 5, 342
-2, Vogue, Vogue author1, Vogue author2., Vogue Pub, 8, 238
-1, Applied Physics, einstein albert, 1950, 2, 676
-2, Time Magazine, Time author1, Time author2, Time author3., The NewYork Times, 9, 345
-3, TheNews Weekly, The News International, 22-9-2023, 7, 235
-1, Out of my mind, julia roberts, 2011, 5, 123
+harry potter and the goblet of fire,jk rowling,1997,7
+the alchemist,paulo coelho,2015,3
+Applied Physics,einstein albert,1950,2
+Out of my mind,julia roberts,2011,5
+The Great Gatsby,fitzgerald,2009,5
+alice in the wonderland,Lewis Carroll,1993,8
