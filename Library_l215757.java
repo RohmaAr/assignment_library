@@ -18,6 +18,7 @@ import java.awt.event.WindowEvent;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.YearMonth;
@@ -41,7 +42,15 @@ import javax.swing.table.DefaultTableCellRenderer;
 public class Library_l215757{
    JTable table;
    private ArrayList<Book> items;
-  
+    public Library_l215757(){
+        items=new ArrayList<>();
+    }
+  public static void main(String[] arr)
+    {
+        Library_l215757 lib=new Library_l215757(); 
+        lib.loadFromFile();
+        lib.Menu();
+    }
      class ButtonRenderer extends DefaultTableCellRenderer {
         private JButton button = new JButton("Read");
 
@@ -136,12 +145,7 @@ public class Library_l215757{
         }
     }
     
-   public static void main(String[] arr)
-    {
-        Library_l215757 lib=new Library_l215757(); 
-        lib.loadFromFile();
-        lib.Menu();
-    }
+   
    public void Menu()
    {
        JFrame frame=new JFrame("Menu");
@@ -250,15 +254,30 @@ table.setFocusable(false);
            if(items.get(i).getTitle().equalsIgnoreCase(b))
            {
                fo=items.get(i);
+               break;
            }
        }
        if(fo!=null){
-       String fou=fo.getTitle().toUpperCase()+" by "+fo.getPubOrAuthor().toUpperCase()+", "+fo.getYear();
+       String fou=fo.getTitle().toUpperCase()+" by "+fo.getPubOrAuthor().toUpperCase()+", "+Integer.toString(fo.getYear());
        found.setText(fou);
-       JButton deleteButton=new JButton("delete");
-       JPanel p3=new JPanel(new FlowLayout());
+      final String four=fo.getTitle()+","+fo.getPubOrAuthor()+","+fo.getYear()+",";
+      final int id=fo.getId();
+      JButton deleteButton=new JButton("delete");
+      JButton cancelButton=new JButton("cancel");
+      JPanel p3=new JPanel(new FlowLayout());
        p3.add(deleteButton);
+       p3.add(cancelButton);
        dialog.add(p3);
+       cancelButton.addActionListener(ee->{
+       dialog.dispose();
+       });
+       deleteButton.addActionListener(ee->{
+           deleteItem(id);
+           findAndReplace(four,"");
+           JOptionPane.showMessageDialog(dialog, fou+" successfully deleted");
+           Menu();
+           f.dispose();
+       });
        }
        else
        {
@@ -271,6 +290,49 @@ table.setFocusable(false);
        dialog.setResizable(false);
         dialog.pack();
        dialog.setVisible(true);
+   }
+   private void findAndReplace(String oldString,String newString)
+   {
+       File fileToBeModified = new File("C:\\Users\\Dell\\Documents\\NetBeansProjects\\scd_a1\\src\\scd_a1\\data.txt");         
+        String oldContent = "";         
+        Scanner reader = null;              
+        try{
+            reader = new Scanner(new FileReader(fileToBeModified));
+            String line;
+            while (reader.hasNext()) 
+            {
+                line = reader.nextLine();
+                oldContent = oldContent + line+"\n" ;
+                
+            }
+             System.out.println(oldContent);
+             int start=oldContent.indexOf(oldString);
+             oldString=oldString+oldContent.charAt(start+oldString.length());
+             System.out.println("old string to be deleted: "+oldString);
+             if(!newString.equals(""))
+             {
+                 newString+="\n";
+             }
+             String newContent = oldContent.replaceAll(oldString+"\n",newString ); 
+         FileWriter   writer = new FileWriter(fileToBeModified);
+             
+            writer.write(newContent);
+              try
+            {
+                reader.close();     
+                writer.close();
+            } 
+            catch (IOException e) 
+            {
+                e.printStackTrace();
+            }
+        
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        
    }
    public void addBook(JFrame f)
    {
@@ -287,9 +349,6 @@ table.setFocusable(false);
        p3.setLayout(new  FlowLayout(FlowLayout.LEFT) );
        JPanel p4=new JPanel();
        p4.setLayout(new BorderLayout());
-//       p1.setBorder(new LineBorder(Color.BLACK,3,true));
-//       p2.setBorder(new LineBorder(Color.BLUE,3,true));
-//       p3.setBorder(new LineBorder(Color.GREEN,3,true));
        JLabel tlabel=new JLabel("Title:");
        JLabel alabel=new JLabel("Author:");
        JLabel ylabel=new JLabel("Publication Year:");
@@ -303,7 +362,7 @@ table.setFocusable(false);
        String y=yearField.getText();
        if(t.isEmpty() || a.isEmpty() || y.isEmpty())
        {
-           JOptionPane.showMessageDialog(authorField, "BALNK BITH");
+           JOptionPane.showMessageDialog(authorField, "Please fill in all fields");
        }
        else
        {
@@ -323,11 +382,15 @@ table.setFocusable(false);
             newBook.setTitle(t);
             newBook.setPop(1);
             items.add(newBook);
-            String savetoFile=t+","+a+","+y+",1";
+            String savetoFile="\n"+t+","+a+","+y+",1";
             File Obj = new File("C:\\Users\\Dell\\Documents\\NetBeansProjects\\scd_a1\\src\\scd_a1\\data.txt");
             try (FileWriter writer = new FileWriter(Obj, true)) {
-            writer.write("\n"+savetoFile);
+            writer.write(savetoFile);
             System.out.println("Line appended to the file."+savetoFile);
+            writer.close();
+            Menu();
+            f.dispose();
+     
         } catch (IOException io) {
             System.err.println("Error appending to the file: " + io.getMessage());
         }
@@ -468,7 +531,7 @@ table.setFocusable(false);
         
         return found;
     }
-    public boolean deleteItem(int id)
+    public void deleteItem(int id)
     {
         int i;
         boolean found=false;
@@ -482,10 +545,9 @@ table.setFocusable(false);
         }
         if(!found)
         {
-            return found;
+            return;
         }
         items.remove(i);
-        return true;
     }
     public void menu()
     {
@@ -527,26 +589,7 @@ table.setFocusable(false);
                         System.out.println("No changes made");
                     }
                     break;
-                case 5:  System.out.println("Enter id:");
-                    sep=obj.nextLine();
-                    id=Integer.valueOf(sep);     
-                    deleteItem(id);
-                    if(deleteItem(id))
-                    {
-                        System.out.println("Deletion made");
-                    }
-                    else 
-                    {
-                        System.out.println("No changes made");
-                    }
-                    
-                    break;
                 case 6: displayAllItems();
-                    break;
-                case 7: System.out.println("Enter id:");
-                        sep=obj.nextLine();
-                        id=Integer.valueOf(sep);
-                        this.displaySingleItem(id);
                     break;
                 case 9: return;
                 default :
@@ -575,23 +618,6 @@ table.setFocusable(false);
             }
         }
     }
-    public Library_l215757(){
-        items=new ArrayList<>();
-    }
-    public void displaySingleItem(int id)
-    {
-        boolean found=false;
-        for(int i=0;i<items.size();i++)
-        {
-            if(items.get(i).getId()==id)
-            {
-                items.get(i).displayInfo();
-                found=true;
-            }
-        }
-        if(found==false)
-            System.out.println("No item exists with the entered id.");
-    }
     private void populateArray(String s)
     {
             Book b=new Book();
@@ -616,6 +642,7 @@ table.setFocusable(false);
             Scanner Reader = new Scanner(Obj);
             while (Reader.hasNextLine()) {
                 String data=Reader.nextLine();
+                if(!data.isEmpty())
                 populateArray(data);
             }
             Reader.close();
