@@ -41,8 +41,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 public class Library_l215757{
    JTable table;
    private ArrayList<Book> items;
-   private HashMap<Integer,Borrower> borrowRecord;
-
+  
      class ButtonRenderer extends DefaultTableCellRenderer {
         private JButton button = new JButton("Read");
 
@@ -214,13 +213,64 @@ table.setFocusable(false);
         addBook(frame);
         });
         editButton.addActionListener(e -> {
-    // Toggle the edit mode
-    boolean editMode = table.isFocusable();
-    table.setFocusable(!editMode);
-});
-
+        boolean editMode = table.isFocusable();
+        table.setFocusable(!editMode);
+        });
+        deleteButton.addActionListener(e->{
+        deleteBook(frame);
+        });
         frame.setVisible(true);
        
+   }
+   public void deleteBook(JFrame f)
+   {
+       JDialog dialog =new JDialog(f);
+       dialog.setTitle("Delete Book");
+       dialog.setLocation(30, 30);
+       dialog.setSize(500,300);
+       dialog.setLayout(new GridLayout(4,1));
+       JPanel p1=new JPanel();
+       p1.setLayout(new FlowLayout(FlowLayout.LEFT) );
+       JPanel p2=new JPanel();
+       p2.setLayout(new  FlowLayout(FlowLayout.LEFT));
+       JLabel bookLabel=new JLabel("Enter Book name:");
+       JTextField bookField=new JTextField(30);
+       
+       p1.add(bookLabel);
+       p1.add(bookField);
+       JLabel foundlabel=new JLabel("Found:");
+       JLabel found=new JLabel("____");
+       p2.add(foundlabel);
+       p2.add(found);
+       bookField.addActionListener(e->{
+       String b=bookField.getText();
+       Book fo = null;
+       for(int i=0;i<items.size();i++)
+       {
+           if(items.get(i).getTitle().equalsIgnoreCase(b))
+           {
+               fo=items.get(i);
+           }
+       }
+       if(fo!=null){
+       String fou=fo.getTitle().toUpperCase()+" by "+fo.getPubOrAuthor().toUpperCase()+", "+fo.getYear();
+       found.setText(fou);
+       JButton deleteButton=new JButton("delete");
+       JPanel p3=new JPanel(new FlowLayout());
+       p3.add(deleteButton);
+       dialog.add(p3);
+       }
+       else
+       {
+        found.setText("No such book found, Try checking the spelling");
+       
+       }
+       });
+       dialog.add(p1);
+       dialog.add(p2);
+       dialog.setResizable(false);
+        dialog.pack();
+       dialog.setVisible(true);
    }
    public void addBook(JFrame f)
    {
@@ -275,9 +325,8 @@ table.setFocusable(false);
             items.add(newBook);
             String savetoFile=t+","+a+","+y+",1";
             File Obj = new File("C:\\Users\\Dell\\Documents\\NetBeansProjects\\scd_a1\\src\\scd_a1\\data.txt");
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(Obj, true))) {
-            // The second argument "true" in FileWriter constructor is for appending
-            writer.write(savetoFile); // Add a newline character if needed
+            try (FileWriter writer = new FileWriter(Obj, true)) {
+            writer.write("\n"+savetoFile);
             System.out.println("Line appended to the file."+savetoFile);
         } catch (IOException io) {
             System.err.println("Error appending to the file: " + io.getMessage());
@@ -436,19 +485,13 @@ table.setFocusable(false);
             return found;
         }
         items.remove(i);
-        if(borrowRecord.containsKey(id))
-        {
-            borrowRecord.remove(id);
-        }
         return true;
     }
     public void menu()
     {
-        Borrower b=new Borrower();
         System.out.println("Enter your name :");
         Scanner obj=new Scanner(System.in);
         String name=obj.nextLine();
-        b.setName(name);
         while(true)
         {
             System.out.println("Library Management System Menu");
@@ -534,7 +577,6 @@ table.setFocusable(false);
     }
     public Library_l215757(){
         items=new ArrayList<>();
-        borrowRecord=new HashMap<>();
     }
     public void displaySingleItem(int id)
     {
@@ -552,8 +594,6 @@ table.setFocusable(false);
     }
     private void populateArray(String s)
     {
-        //if(s.charAt(0)=='1')
-        //{
             Book b=new Book();
              Scanner dataScan=new Scanner(s);   
              dataScan.useDelimiter(",");
@@ -568,62 +608,7 @@ table.setFocusable(false);
                  b.setId();
                  b.displayInfo();
                  items.add(b);
-                // items.get(items.size()-1).displayInfo();
-//       }
-//        else if(s.charAt(0)=='2')
-//        {
-//            Magazine m=new Magazine();
-//             Scanner dataScan=new Scanner(s);
-//             dataScan.useDelimiter(",");
-//               dataScan.next();
-//                   String sep=dataScan.next();
-//                m.setTitle(sep);
-//                sep=dataScan.next();
-//                while(!sep.endsWith("."))
-//                {
-//                    m.addAuthor(sep);
-//                    sep=dataScan.next();
-//                }
-//                m.addAuthor(sep);
-//                sep=dataScan.next();
-//                m.setPub(sep);
-//                sep=dataScan.next().trim();
-//                m.setPop(Integer.valueOf(sep));
-//                sep=dataScan.next().trim();
-//                m.setCost(m.calculateCost(Integer.valueOf(sep)));
-//                m.setId();
-//                items.add(m);
-//                // items.get(items.size()-1).displayInfo();
-//        }
-//        else if(s.charAt(0)=='3')
-//        {
-//            Newspaper n=new Newspaper();
-//             Scanner dataScan=new Scanner(s);
-//             dataScan.useDelimiter(",");
-//             dataScan.next();
-//                   String sep=dataScan.next();
-//                n.setTitle(sep);
-//                sep=dataScan.next();
-//                n.setPub(sep);
-//                sep=dataScan.next().trim();
-//                
-//                try {
-//                        n.setDate(new SimpleDateFormat("dd-MM-yyyy").parse(sep));
-//}               catch (ParseException e) {
-//                e.printStackTrace(); 
-//                }
-//                sep=dataScan.next().trim();
-//                n.setPop(Integer.valueOf(sep));
-//                sep=dataScan.next().trim();
-//                n.setCost(n.calculateCost(Integer.valueOf(sep)));
-//                n.setId();
-//                  items.add(n);
-//                // items.get(items.size()-1).displayInfo();
-//           
-//        }
-//        else
-//            System.out.println("Incorrect format.");
-//            
+              
     }
     public void loadFromFile(){
          try {
@@ -753,132 +738,4 @@ class Book{
     {
         cost=c;
     }
-}
-//class Magazine extends Item{
-//    private String publisher;
-//    private ArrayList<String> authors;
-//    public void setPub(String s)
-//    {
-//        publisher=s;
-//    }
-//    public void displayAuthors()
-//    {
-//        for(int i=0;i<authors.size();i++){
-//        System.out.println(i+1+" "+authors.get(i));
-//        }
-//    }
-//    @Override
-//    public String getPubOrAuthor()
-//    {
-//        return publisher;
-//    }
-//    public int noOfAuthors()
-//    {
-//        return authors.size();
-//    }
-//    public void addAuthor(String s)
-//    {
-//        if(authors==null)
-//        {
-//            authors= new ArrayList<>();
-//        }
-//        authors.add(s);
-//    }
-//    public String removeAuthor(int i)
-//    {
-//        return authors.remove(i);
-//    }
-//    @Override
-//    public void displayInfo() {
-//        
-//        System.out.println("");
-//        System.out.println("MAGAZINE Id: "+id);
-//        System.out.println("Title: "+title);
-//        System.out.println("Author: "+authors);
-//        System.out.println("Publisher: "+publisher);
-//        if(isBorrowed==true)
-//        System.out.println("Status: unavailable");
-//        else
-//            System.out.println("Status: available");
-//        System.out.println("Cost: "+cost+" Rs.");
-//        System.out.println("Popularity count: "+popCount);
-//        System.out.println("");
-//    }
-//
-//    @Override
-//    public final int calculateCost(int c) {
-//        return (c*popCount);
-//    }
-//}
-//class Newspaper extends Item{
-//    private String publisher;
-//    private Date date;
-//    public void setPub(String s)
-//    {
-//        publisher=s;
-//    }
-//    public void setDate(Date d)
-//    {
-//        date=d;
-//    }
-//    public String getPubOrAuthor()
-//    {
-//        return publisher;
-//    }
-//    public Date getDate()
-//    {
-//        return date;
-//    }
-//    @Override
-//    public void displayInfo() {
-//    
-//        System.out.println("");
-//        System.out.println("NEWSPAPER Id: "+id);
-//        System.out.println("Title: "+title);
-//        System.out.println("Publisher: "+publisher);
-//        System.out.println("Publishing Date: "+date);
-//        if(isBorrowed==true)
-//        System.out.println("Status: unavailable");
-//        else
-//            System.out.println("Status: available");
-//        System.out.println("Cost: "+cost+" Rs.");
-//        System.out.println("Popularity count: "+popCount);
-//        System.out.println("");
-//    }
-//
-//    @Override
-//    public int calculateCost(int c) {
-//        return (10+(5*c));
-//    }
-//}
-class Borrower{
-    private String name;
-    public void setName(String n)
-    {
-        name=n;
-    }
-    public String getName()
-    {
-        return name;
-    }
-    @Override
-    public boolean equals(Object o)
-    {
-        if(this==o)
-            return true;
-        if(o==null || getClass()!=o.getClass())
-            return false;
-        else
-        {
-            Borrower b=(Borrower)o;
-            return getName().equals(b.getName());
-            
-        }
-    }
-    @Override
-    public int hashCode()
-    {
-        return name.hashCode();
-    }
-    
 }
