@@ -15,7 +15,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -24,11 +23,11 @@ import java.io.IOException;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
+import javax.swing.border.LineBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 
 /**
@@ -40,7 +39,6 @@ import javax.swing.table.DefaultTableCellRenderer;
 
    
 public class Library_l215757{
-   JTable table;
    private ArrayList<Book> items;
     public Library_l215757(){
         items=new ArrayList<>();
@@ -154,9 +152,8 @@ public class Library_l215757{
         frame.setLayout(new FlowLayout());
         frame.setBackground(Color.GRAY);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        String[][] menuArray;
         String[] colNames={"Title","Author","Year","Read"};
-        menuArray=new String[items.size()][4];
+        String[][] menuArray=new String[items.size()][4];
         for(int i=0;i<items.size();i++){
            
            menuArray[i][0]=items.get(i).getTitle();
@@ -172,28 +169,9 @@ public class Library_l215757{
             }
             System.out.println("");
         }
-      
-        String[][] originalData = new String[items.size()][4];
-for (int i = 0; i < items.size(); i++) {
-    originalData[i][0] = items.get(i).getTitle();
-    originalData[i][1] = items.get(i).getPubOrAuthor();
-    originalData[i][2] = String.valueOf(items.get(i).getYear());
-}
-        table=new JTable(menuArray,colNames);
-           table.addMouseMotionListener(new MouseMotionListener(){
-           @Override
-           public void mouseDragged(MouseEvent e) {
-             //  throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-           }
 
-           @Override
-           public void mouseMoved(MouseEvent e) {
-            int row = table.rowAtPoint(e.getPoint());
-    if (row >= 0) {
-        table.getSelectionModel().setSelectionInterval(row, row); // Highlight the row
-    }    
-           }
-        });
+     JTable table;
+      table=new JTable(menuArray,colNames);
         table.setDefaultEditor(Object.class, null);
 
 // Make the table uneditable but allow row selection
@@ -213,6 +191,9 @@ table.setFocusable(false);
         frame.add(deleteButton);
         frame.add(editButton);
         frame.add(addButton);
+        editButton.addActionListener(e->{
+        editBook(frame);
+        });
         addButton.addActionListener(e->{
         addBook(frame);
         });
@@ -226,42 +207,137 @@ table.setFocusable(false);
         frame.setVisible(true);
        
    }
+   public void editBook(JFrame f)
+   {
+       JDialog dialog =new JDialog(f);
+       dialog.setTitle("Pick a Book");
+       dialog.setLocation(30, 30);
+       dialog.setSize(500,300);
+       dialog.setLayout(new FlowLayout());
+       JLabel pickaBookLabel=new JLabel("Pick a book you want to edit:");
+       JComboBox<String> bookComboBox=new JComboBox<>();
+       for (Book book : items) {
+          bookComboBox.addItem(book.getTitle());
+        }
+       bookComboBox.setEditable(false);
+       bookComboBox.addActionListener(e->{
+       String clickedBook=(String)bookComboBox.getSelectedItem();
+       bookComboBox.setVisible(false);
+       pickaBookLabel.setText("Edit the fields you want to edit");
+       int i;
+       for(i=0;i<items.size();i++)
+       {
+           if(items.get(i).getTitle().equalsIgnoreCase(clickedBook))
+           {
+               break;
+           }
+       }
+       final Book fo=items.get(i);
+       final int id=fo.getId();
+       JPanel p1=new JPanel(new FlowLayout());
+       JLabel titleLabel=new JLabel("Title:");
+       JTextField titleField=new JTextField(30);
+       titleField.setText(fo.getTitle());
+       p1.add(titleLabel);
+       p1.add(titleField);
+       //p1.setBorder(new LineBorder(Color.BLACK,2,true));
+       JPanel p2=new JPanel(new FlowLayout());
+       JLabel authorLabel=new JLabel("Author:");
+       JTextField authorField=new JTextField(30);
+       authorField.setText(fo.getPubOrAuthor());
+       p2.add(authorLabel);
+       p2.add(authorField);
+       JPanel p3=new JPanel(new FlowLayout());
+       JLabel yearLabel=new JLabel("Publication Year:");
+       JTextField yearField=new JTextField(30);
+       yearField.setText(Integer.toString(fo.getYear()));
+       p3.add(yearLabel);
+       p3.add(yearField);
+       JButton submitButton=new JButton("Save Changes");
+       JButton cancelButton=new JButton("Cancel Changes");
+       JPanel buttons=new JPanel(new FlowLayout());
+       buttons.add(submitButton);
+       buttons.add(cancelButton);
+       JPanel EditFields=new JPanel(new GridLayout(4,1));
+       EditFields.add(p1);
+       EditFields.add(p2);
+       EditFields.add(p3);
+       EditFields.add(buttons);
+       dialog.add(EditFields);
+
+       submitButton.addActionListener(ee->{
+      
+           try{
+        int year=Integer.parseInt(yearField.getText());
+        YearMonth currentYearMonth = YearMonth.now();
+        int curryear = currentYearMonth.getYear();
+        if(year>curryear)
+        {
+            throw new NumberFormatException();
+        }
+      }catch (NumberFormatException ex)
+      {
+          JOptionPane.showMessageDialog(dialog, "Incorrect input for year");
+      }
+           String change=titleField.getText()+" by "+authorField.getText()+","+Integer.parseInt(yearField.getText());
+           int choice=JOptionPane.showConfirmDialog(dialog, fo.getTitle()+"by "+fo.getPubOrAuthor()+","+Integer.toString(fo.getYear())+" will be permanently changed to "+change, "Confirm Changes", JOptionPane.OK_CANCEL_OPTION);
+       if(choice==JOptionPane.OK_OPTION){
+           
+           change=titleField.getText()+","+authorField.getText()+","+Integer.parseInt(yearField.getText())+","+Integer.toString(fo.getPop());
+           System.out.println("Change "+change);
+           System.out.println(fo.getTitle()+","+fo.getPubOrAuthor()+","+Integer.toString(fo.getYear()));
+           findAndReplace(fo.getTitle()+","+fo.getPubOrAuthor()+","+Integer.toString(fo.getYear())+",",change);
+           Book b=(Book)this.getItemById(id);
+           b.setTitle(titleField.getText());
+           b.setAuthor(authorField.getText());
+           b.setYear(Integer.parseInt(yearField.getText()));
+           b.displayInfo();
+           JOptionPane.showMessageDialog(dialog, "Changes successfully saved");
+           Menu();
+           f.dispose();
+           }
+           else {
+           dialog.dispose();
+           }
+       });
+       cancelButton.addActionListener(eee->{
+       dialog.dispose();
+       });
+       
+       });
+       dialog.add(pickaBookLabel);
+       dialog.add(bookComboBox); 
+       dialog.setVisible(true);
+   }
    public void deleteBook(JFrame f)
    {
        JDialog dialog =new JDialog(f);
        dialog.setTitle("Delete Book");
        dialog.setLocation(30, 30);
        dialog.setSize(500,300);
-       dialog.setLayout(new GridLayout(4,1));
-       JPanel p1=new JPanel();
-       p1.setLayout(new FlowLayout(FlowLayout.LEFT) );
-       JPanel p2=new JPanel();
-       p2.setLayout(new  FlowLayout(FlowLayout.LEFT));
-       JLabel bookLabel=new JLabel("Enter Book name:");
-       JTextField bookField=new JTextField(30);
-       
-       p1.add(bookLabel);
-       p1.add(bookField);
-       JLabel foundlabel=new JLabel("Found:");
-       JLabel found=new JLabel("____");
-       p2.add(foundlabel);
-       p2.add(found);
-       bookField.addActionListener(e->{
-       String b=bookField.getText();
+       dialog.setLayout(new FlowLayout());
+       JLabel pickaBookLabel=new JLabel("Pick a book you want to edit:");
+       JComboBox<String> bookComboBox=new JComboBox<>();
+       for (Book book : items) {
+          bookComboBox.addItem(book.getTitle());
+        }
+       bookComboBox.setEditable(false);
+       bookComboBox.addActionListener(e->{
+       String clickedBook=(String)bookComboBox.getSelectedItem();
+       bookComboBox.setVisible(false);
        Book fo = null;
        for(int i=0;i<items.size();i++)
        {
-           if(items.get(i).getTitle().equalsIgnoreCase(b))
+           if(items.get(i).getTitle().equalsIgnoreCase(clickedBook))
            {
                fo=items.get(i);
                break;
            }
        }
-       if(fo!=null){
-       String fou=fo.getTitle().toUpperCase()+" by "+fo.getPubOrAuthor().toUpperCase()+", "+Integer.toString(fo.getYear());
-       found.setText(fou);
+       final String fou=fo.getTitle().toUpperCase()+" by "+fo.getPubOrAuthor().toUpperCase()+", "+Integer.toString(fo.getYear());
       final String four=fo.getTitle()+","+fo.getPubOrAuthor()+","+fo.getYear()+",";
       final int id=fo.getId();
+      pickaBookLabel.setText("Found book : "+fou);
       JButton deleteButton=new JButton("delete");
       JButton cancelButton=new JButton("cancel");
       JPanel p3=new JPanel(new FlowLayout());
@@ -272,23 +348,23 @@ table.setFocusable(false);
        dialog.dispose();
        });
        deleteButton.addActionListener(ee->{
+           int choice=JOptionPane.showConfirmDialog(dialog, fou+" will be permanently deleted.", "Confirm Delete", JOptionPane.OK_CANCEL_OPTION);
+           if(choice==JOptionPane.OK_OPTION){
            deleteItem(id);
            findAndReplace(four,"");
            JOptionPane.showMessageDialog(dialog, fou+" successfully deleted");
            Menu();
            f.dispose();
+           }
+           else {
+           dialog.dispose();
+           }
        });
-       }
-       else
-       {
-        found.setText("No such book found, Try checking the spelling");
-       
-       }
        });
-       dialog.add(p1);
-       dialog.add(p2);
+       dialog.add(pickaBookLabel);
+       dialog.add(bookComboBox);
        dialog.setResizable(false);
-        dialog.pack();
+     //   dialog.pack();
        dialog.setVisible(true);
    }
    private void findAndReplace(String oldString,String newString)
@@ -305,10 +381,10 @@ table.setFocusable(false);
                 oldContent = oldContent + line+"\n" ;
                 
             }
-             System.out.println(oldContent);
+            // System.out.println(oldContent);
              int start=oldContent.indexOf(oldString);
              oldString=oldString+oldContent.charAt(start+oldString.length());
-             System.out.println("old string to be deleted: "+oldString);
+             System.out.println("old string to be deleted: "+oldString+"new String "+newString);
              if(!newString.equals(""))
              {
                  newString+="\n";
@@ -434,103 +510,6 @@ table.setFocusable(false);
     {
         i.displayInfo();
     }
-    public void addItem()
-    {
-        JFrame frame=new JFrame("Add Item");
-        System.out.println("What category of item would you like to add?");
-        System.out.println("1.Book");
-        System.out.println("2.Magazine");
-        System.out.println("3.Newspaper");
-        System.out.println("4.Exit");
-        System.out.println("Pick your choice:");
-        Scanner dataScan=new Scanner(System.in);
-        String sep=dataScan.nextLine();
-        int n=Integer.valueOf(sep);
-            Book  item=new Book();
-                System.out.println("Enter title of book:");
-                sep=dataScan.nextLine();
-                item.setTitle(sep);
-                System.out.println("Enter book's author's name:");
-                 sep=dataScan.nextLine();
-                item.setAuthor(sep);
-                System.out.println("Enter book's year of publishment:");
-                 sep=dataScan.nextLine().trim();
-                item.setYear(Integer.valueOf(sep));
-                item.setPop(1);
-                System.out.println("Enter the sale price of the book:");
-                sep=dataScan.nextLine().trim();
-                 item.setCost(item.calculateCost(Integer.valueOf(sep)));
-                 item.setId();
-                 items.add(item);
-                 System.out.println("Book has been added to library records");
-            
-    }
-    public boolean editItem(int id)
-    {
-        int i;
-        boolean found=false;
-        for(i=0;i<items.size();i++)
-        {
-            if(items.get(i).getId()==id)
-            {
-                found=true;
-                break;
-            }
-        }
-        if(!found)
-        {
-            return found;
-        }
-        int n;
-        Scanner dataScan=new Scanner(System.in);
-         String sep;
-        System.out.println("The item you picked is :");
-        items.get(i).displayInfo();
-
-            Book book=(Book)items.get(i);
-            System.out.println("Book");
-            System.out.println("What do you want to edit in "+book.getTitle()+"?");
-            System.out.println("1.Title");
-            System.out.println("2.Author");
-            System.out.println("3.Year of publishing");
-            System.out.println("4.Popularity");
-            System.out.println("5.Cost");
-            System.out.println("6.Exit");
-            sep=dataScan.nextLine();
-            n=Integer.valueOf(sep);
-            switch(n){
-                case 1:System.out.println("Enter new title of book:");
-                sep=dataScan.nextLine();
-                book.setTitle(sep);
-                    System.out.println("Title changed");
-                    break;
-                case 2: System.out.println("Enter new author's name:");
-                 sep=dataScan.nextLine();
-                book.setAuthor(sep);
-                    System.out.println("Author name changed");
-                    break;
-                case 3:
-                System.out.println("Enter book's year of publishment:");
-                 sep=dataScan.nextLine().trim();
-                book.setYear(Integer.valueOf(sep));
-                    System.out.println("Year of publishing changed");
-                    break;
-                case 4: System.out.println("Enter new popularity count:");
-                sep=dataScan.nextLine().trim();
-                book.setPop(Integer.valueOf(sep));
-                break;
-                
-                case 5: System.out.println("Enter the new sale price of the book:");
-                sep=dataScan.nextLine().trim();
-                 book.setCost(book.calculateCost(Integer.valueOf(sep)));
-                 break;
-                case 6: return false;
-                default : System.out.println("Incorrect option");
-                return false;
-            }
-        
-        return found;
-    }
     public void deleteItem(int id)
     {
         int i;
@@ -548,55 +527,6 @@ table.setFocusable(false);
             return;
         }
         items.remove(i);
-    }
-    public void menu()
-    {
-        System.out.println("Enter your name :");
-        Scanner obj=new Scanner(System.in);
-        String name=obj.nextLine();
-        while(true)
-        {
-            System.out.println("Library Management System Menu");
-            System.out.println("1.Hot Picks!!");
-            System.out.println("2.Borrow an item");
-            System.out.println("3.Add item");
-            System.out.println("4.Edit item");
-            System.out.println("5.Delete item");
-            System.out.println("6.View all items");
-            System.out.println("7.View items by ID");
-            System.out.println("8.View Borrowers list");
-            System.out.println("9.Exit");
-            System.out.println("Pick your choice:");
-            String sep=obj.nextLine();
-            int n=Integer.valueOf(sep);
-        
-            int id;
-            switch (n)
-            {
-                case 1: hotPicks();
-                    break;
-                case 3:  addItem();
-                    break;
-                case 4:System.out.println("Enter id of item you want to edit:"); 
-                    sep=obj.nextLine();
-                    id=Integer.valueOf(sep);
-                    if(editItem(id))
-                    {
-                        System.out.println("The changes you made have been saved");
-                    }
-                    else 
-                    {
-                        System.out.println("No changes made");
-                    }
-                    break;
-                case 6: displayAllItems();
-                    break;
-                case 9: return;
-                default :
-                    System.out.println("Invalid input");
-            }
-            
-        }
     }
     public void hotPicks()
     {
@@ -623,15 +553,24 @@ table.setFocusable(false);
             Book b=new Book();
              Scanner dataScan=new Scanner(s);   
              dataScan.useDelimiter(",");
-                 String sep=dataScan.next();
+              String sep;
+             if(dataScan.hasNext()){
+                 sep=dataScan.next();
                 b.setTitle(sep);
+             }
+             if(dataScan.hasNext()){
                  sep=dataScan.next();
                 b.setAuthor(sep);
-                 sep=dataScan.next().trim();
+             }
+              if(dataScan.hasNext()){
+            sep=dataScan.next().trim();
                 b.setYear(Integer.valueOf(sep));
-                 sep=dataScan.next().trim();
+              }
+               if(dataScan.hasNext()){
+            sep=dataScan.next().trim();
                 b.setPop(Integer.valueOf(sep));
-                 b.setId();
+               }
+               b.setId();
                  b.displayInfo();
                  items.add(b);
               
