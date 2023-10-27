@@ -7,7 +7,11 @@ package scd_a1;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -87,6 +91,13 @@ public class Library_l215757{
                 String fileName = table.getValueAt(selectedRow, 0).toString();
                 if (fileName != null) {
                     System.out.println(fileName);
+                    for(int i=0;i<items.size();i++){
+                    if(items.get(i).getTitle().equals(fileName)){
+                     int p=items.get(i).getPop();
+                        items.get(i).setPop(++p);
+                        break;
+                    }
+                    }
                     readBook(fileName);
                 }
             }
@@ -188,9 +199,14 @@ table.setFocusable(false);
         JButton deleteButton=new JButton("Delete");
         JButton editButton=new JButton("Edit");
         JButton addButton=new JButton("Add");
+        JButton popButton=new JButton("Popular picks");
         frame.add(deleteButton);
         frame.add(editButton);
         frame.add(addButton);
+        frame.add(popButton);
+        popButton.addActionListener(e->{
+        popularityChart();
+        });
         editButton.addActionListener(e->{
         editBook(frame);
         });
@@ -494,6 +510,116 @@ table.setFocusable(false);
         dialog.pack();
        dialog.setVisible(true);
    }
+   public class BarChart extends JPanel {
+ 
+  private int[] values;
+  private String[] labels;
+  private Color[] colors;
+  private String title;
+ 
+  public BarChart(int[] values, String[] labels,  String title) {
+    this.labels = labels;
+    this.values = values;
+        this.colors = generateDistinctColors(values.length);
+    this.title = title;
+  }
+      private Color[] generateDistinctColors(int numColors) {
+        Color[] generatedColors = new Color[numColors];
+        for (int i = 0; i < numColors; i++) {
+            float hue = (float) i / numColors; // Distribute hues evenly
+            generatedColors[i] = Color.getHSBColor(hue, 0.8f, 0.9f);
+        }
+        return generatedColors;
+    }
+@Override
+  public void paintComponent(Graphics g) {
+   super.paintComponent(g);
+    if (values == null || values.length == 0) {
+        return;
+    }
+
+    double minValue = 0;
+    double maxValue = 0;
+    for (int i = 0; i < values.length; i++) {
+        if (minValue > values[i]) {
+            minValue = values[i];
+        }
+        if (maxValue < values[i]) {
+            maxValue = values[i];
+        }
+    }
+
+    Dimension dim = getSize();
+    int panelWidth = dim.width;
+    int panelHeight = dim.height;
+    int barWidth = panelWidth / values.length;
+
+    Font titleFont = new Font("Book Antiqua", Font.BOLD, 15);
+    FontMetrics titleFontMetrics = g.getFontMetrics(titleFont);
+
+    Font labelFont = new Font("Book Antiqua", Font.PLAIN, 14);
+    FontMetrics labelFontMetrics = g.getFontMetrics(labelFont);
+
+    int titleWidth = titleFontMetrics.stringWidth(title);
+    int titleHeight = titleFontMetrics.getHeight();
+    int titleX = (panelWidth - titleWidth) / 2;
+    g.setFont(titleFont);
+    g.drawString(title, titleX, titleHeight);
+
+    int top = titleHeight; // Adjusted for title height
+    int bottom = labelFontMetrics.getHeight();
+    if (maxValue == minValue) {
+        return;
+    }
+    double scale = (panelHeight - top - bottom) / (maxValue - minValue);
+
+    g.setFont(labelFont);
+    for (int j = 0; j < values.length; j++) {
+        int valueP = j * barWidth + 1;
+        int valueQ = top;
+        int height = (int) (values[j] * scale);
+        if (values[j] >= 0) {
+            valueQ += (int) ((maxValue - values[j]) * scale);
+        } else {
+            valueQ += (int) (maxValue * scale);
+            height = -height;
+        }
+
+        g.setColor(colors[j]);
+        g.fillRect(valueP, valueQ, barWidth - 2, height);
+        g.setColor(Color.black);
+        g.drawRect(valueP, valueQ, barWidth - 2, height);
+
+        String label = labels[j];
+        int labelWidth = labelFontMetrics.stringWidth(label);
+        int labelX = j * barWidth + (barWidth - labelWidth) / 2;
+        int labelY = panelHeight - labelFontMetrics.getDescent();
+        g.drawString(label, labelX, labelY);
+    }
+  
+  }
+   }
+   public void popularityChart() {
+  JFrame frame = new JFrame("Popular Books");
+    frame.setSize(500, 500);
+    String title = "Popular Books";
+    double[] va = new double[]{1,2,3,4,5,6,3,4,6};
+    int[] values=new int[items.size()];
+    String[] labels = new String[items.size()];
+    for(int i=0;i<items.size();i++)
+    {
+        values[i]=items.get(i).getPop();
+        labels[i]=items.get(i).getTitle();
+    }
+    BarChart bc = new BarChart(values, labels, title);
+    frame.addWindowListener(new WindowAdapter(){
+                @Override
+                public void windowClosing(WindowEvent e) {
+                         frame.dispose();
+                }});
+    frame.add(bc);
+    frame.setVisible(true);
+  }
     private Book getItemById(int id)
     {
         for(int i=0;i<items.size();i++)
